@@ -7,6 +7,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/lostreturns/fedex/common"
 )
@@ -14,6 +15,7 @@ import (
 const (
 	apiWSDLTest = "https://wsbeta.fedex.com:443/web-services/rate"
 	apiWSDLLive = "https://ws.fedex.com:443/web-services/rate"
+	RATESOAP    = "http://fedex.com/ws/rate/v28"
 )
 
 type Address struct {
@@ -587,7 +589,7 @@ type RateXMLRequest struct {
 	XMLName    xml.Name `xml:"SOAP-ENV:Envelope"`
 	Xmlns_xsi  string   `xml:"xmlns xsi,attr,omitempty"`
 	Xmlns_xsd  string   `xml:"xmlns xsd,attr,omitempty"`
-	Xmlns_ns   string   `xml:"xmlns xns,attr,omitempty"`
+	Xmlnsns    string   `xml:"xmlns xns,attr,omitempty"`
 	Xmlns_soap string   `xml:"xmlns SOAP-ENV,attr,omitempty"`
 	Xmlns_enc  string   `xml:"xmlns SOAP-ENC,attr,omitempty"`
 	Text       string   `xml:",chardata"`
@@ -610,113 +612,113 @@ type RateXMLRequest struct {
 			} `xml:"WebAuthenticationDetail"`
 			ClientDetail struct {
 				Text          string `xml:",chardata"`
-				AccountNumber string `xml:"AccountNumber"`
-				MeterNumber   string `xml:"MeterNumber"`
-				SoftwareId    string `xml:"SoftwareId"`
-			} `xml:"ClientDetail"`
+				AccountNumber string `xml:"AccountNumber,omitempty"`
+				MeterNumber   string `xml:"MeterNumber,omitempty"`
+				SoftwareId    string `xml:"SoftwareId,omitempty"`
+			} `xml:"ClientDetail,omitempty"`
 			TransactionDetail struct {
 				Text                  string `xml:",chardata"`
-				CustomerTransactionId string `xml:"CustomerTransactionId"`
-			} `xml:"TransactionDetail"`
+				CustomerTransactionId string `xml:"CustomerTransactionId,omitempty"`
+			} `xml:"TransactionDetail,omitempty"`
 			Version struct {
 				Text         string `xml:",chardata"`
-				ServiceId    string `xml:"ServiceId"`
-				Major        string `xml:"Major"`
-				Intermediate string `xml:"Intermediate"`
-				Minor        string `xml:"Minor"`
-			} `xml:"Version"`
+				ServiceId    string `xml:"ServiceId,omitempty"`
+				Major        string `xml:"Major,omitempty"`
+				Intermediate string `xml:"Intermediate,omitempty"`
+				Minor        string `xml:"Minor,omitempty"`
+			} `xml:"Version,omitempty"`
 			RequestedShipment struct {
 				Text          string `xml:",chardata"`
-				ShipTimestamp string `xml:"ShipTimestamp"`
-				DropoffType   string `xml:"DropoffType"`
-				ServiceType   string `xml:"ServiceType"`
-				PackagingType string `xml:"PackagingType"`
+				ShipTimestamp string `xml:"ShipTimestamp,omitempty"`
+				DropoffType   string `xml:"DropoffType,omitempty"`
+				ServiceType   string `xml:"ServiceType,omitempty"`
+				PackagingType string `xml:"PackagingType,omitempty"`
 				TotalWeight   struct {
 					Text  string `xml:",chardata"`
-					Units string `xml:"Units"`
-					Value string `xml:"Value"`
-				} `xml:"TotalWeight"`
+					Units string `xml:"Units,omitempty"`
+					Value string `xml:"Value,omitempty"`
+				} `xml:"TotalWeight,omitempty"`
 				Shipper struct {
 					Text          string `xml:",chardata"`
-					AccountNumber string `xml:"AccountNumber"`
+					AccountNumber string `xml:"AccountNumber,omitempty"`
 					Contact       struct {
 						Text        string `xml:",chardata"`
-						CompanyName string `xml:"CompanyName"`
-						PhoneNumber string `xml:"PhoneNumber"`
-					} `xml:"Contact"`
+						CompanyName string `xml:"CompanyName,omitempty"`
+						PhoneNumber string `xml:"PhoneNumber,omitempty"`
+					} `xml:"Contact,omitempty"`
 					Address struct {
 						Text                string   `xml:",chardata"`
-						StreetLines         []string `xml:"StreetLines"`
-						City                string   `xml:"City"`
-						StateOrProvinceCode string   `xml:"StateOrProvinceCode"`
-						PostalCode          string   `xml:"PostalCode"`
-						CountryCode         string   `xml:"CountryCode"`
-					} `xml:"Address"`
-				} `xml:"Shipper"`
+						StreetLines         []string `xml:"StreetLines,omitempty"`
+						City                string   `xml:"City,omitempty"`
+						StateOrProvinceCode string   `xml:"StateOrProvinceCode,omitempty"`
+						PostalCode          string   `xml:"PostalCode,omitempty"`
+						CountryCode         string   `xml:"CountryCode,omitempty"`
+					} `xml:"Address,omitempty"`
+				} `xml:"Shipper,omitempty"`
 				Recipient struct {
 					Text          string `xml:",chardata"`
-					AccountNumber string `xml:"AccountNumber"`
+					AccountNumber string `xml:"AccountNumber,omitempty"`
 					Contact       struct {
 						Text        string `xml:",chardata"`
-						PersonName  string `xml:"PersonName"`
-						PhoneNumber string `xml:"PhoneNumber"`
-					} `xml:"Contact"`
+						PersonName  string `xml:"PersonName,omitempty"`
+						PhoneNumber string `xml:"PhoneNumber,omitempty"`
+					} `xml:"Contact,omitempty"`
 					Address struct {
 						Text                string   `xml:",chardata"`
-						StreetLines         []string `xml:"StreetLines"`
-						City                string   `xml:"City"`
-						StateOrProvinceCode string   `xml:"StateOrProvinceCode"`
-						PostalCode          string   `xml:"PostalCode"`
-						CountryCode         string   `xml:"CountryCode"`
-						CountryName         string   `xml:"CountryName"`
-						Residential         string   `xml:"Residential"`
-					} `xml:"Address"`
-				} `xml:"Recipient"`
+						StreetLines         []string `xml:"StreetLines,omitempty"`
+						City                string   `xml:"City,omitempty"`
+						StateOrProvinceCode string   `xml:"StateOrProvinceCode,omitempty"`
+						PostalCode          string   `xml:"PostalCode,omitempty"`
+						CountryCode         string   `xml:"CountryCode,omitempty"`
+						CountryName         string   `xml:"CountryName,omitempty"`
+						Residential         string   `xml:"Residential,omitempty"`
+					} `xml:"Address,omitempty"`
+				} `xml:"Recipient,omitempty"`
 				ShippingChargesPayment struct {
 					Text        string `xml:",chardata"`
-					PaymentType string `xml:"PaymentType"`
+					PaymentType string `xml:"PaymentType,omitempty"`
 					Payor       struct {
 						Text             string `xml:",chardata"`
 						ResponsibleParty struct {
 							Text          string `xml:",chardata"`
-							AccountNumber string `xml:"AccountNumber"`
+							AccountNumber string `xml:"AccountNumber,omitempty"`
 							Tins          struct {
 								Text    string `xml:",chardata"`
-								TinType string `xml:"TinType"`
-								Number  string `xml:"Number"`
-							} `xml:"Tins"`
-						} `xml:"ResponsibleParty"`
-					} `xml:"Payor"`
-				} `xml:"ShippingChargesPayment"`
-				RateRequestTypes          string `xml:"RateRequestTypes"`
-				PackageCount              string `xml:"PackageCount"`
+								TinType string `xml:"TinType,omitempty"`
+								Number  string `xml:"Number,omitempty"`
+							} `xml:"Tins,omitempty"`
+						} `xml:"ResponsibleParty,omitempty"`
+					} `xml:"Payor,omitempty"`
+				} `xml:"ShippingChargesPayment,omitempty"`
+				RateRequestTypes          string `xml:"RateRequestTypes,omitempty"`
+				PackageCount              string `xml:"PackageCount,omitempty"`
 				RequestedPackageLineItems struct {
 					Text              string `xml:",chardata"`
-					SequenceNumber    string `xml:"SequenceNumber"`
-					GroupNumber       string `xml:"GroupNumber"`
-					GroupPackageCount string `xml:"GroupPackageCount"`
+					SequenceNumber    string `xml:"SequenceNumber,omitempty"`
+					GroupNumber       string `xml:"GroupNumber,omitempty"`
+					GroupPackageCount string `xml:"GroupPackageCount,omitempty"`
 					Weight            struct {
 						Text  string `xml:",chardata"`
-						Units string `xml:"Units"`
-						Value string `xml:"Value"`
-					} `xml:"Weight"`
+						Units string `xml:"Units,omitempty"`
+						Value string `xml:"Value,omitempty"`
+					} `xml:"Weight,omitempty"`
 					Dimensions struct {
 						Text   string `xml:",chardata"`
-						Length string `xml:"Length"`
-						Width  string `xml:"Width"`
-						Height string `xml:"Height"`
-						Units  string `xml:"Units"`
-					} `xml:"Dimensions"`
+						Length string `xml:"Length,omitempty"`
+						Width  string `xml:"Width,omitempty"`
+						Height string `xml:"Height,omitempty"`
+						Units  string `xml:"Units,omitempty"`
+					} `xml:"Dimensions,omitempty"`
 					ContentRecords struct {
 						Text             string `xml:",chardata"`
-						PartNumber       string `xml:"PartNumber"`
-						ItemNumber       string `xml:"ItemNumber"`
-						ReceivedQuantity string `xml:"ReceivedQuantity"`
-						Description      string `xml:"Description"`
-					} `xml:"ContentRecords"`
-				} `xml:"RequestedPackageLineItems"`
-			} `xml:"RequestedShipment"`
-		} `xml:"RateRequest"`
+						PartNumber       string `xml:"PartNumber,omitempty"`
+						ItemNumber       string `xml:"ItemNumber,omitempty"`
+						ReceivedQuantity string `xml:"ReceivedQuantity,omitempty"`
+						Description      string `xml:"Description,omitempty"`
+					} `xml:"ContentRecords,omitempty"`
+				} `xml:"RequestedPackageLineItems,omitempty"`
+			} `xml:"RequestedShipment,omitempty"`
+		} `xml:"RateRequest,omitempty"`
 	} `xml:"SOAP-ENV:Body"`
 }
 
@@ -994,11 +996,13 @@ func (c RateRequest) Rate(token string, apiUrl string) (RateResponse, error) {
 	return _response, nil
 }
 
-func (c RateXMLRequest) Rate(url string) {
-	request, err := xml.Marshal(c)
-	content, err := common.Fedex{}.PostRequest(string(request), url)
+func (c RateXMLRequest) Rate(url string, testMode bool) {
+	request, _ := xml.Marshal(c)
+	newStr := `SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://fedex.com/ws/rate/v28"`
+	s := strings.Replace(string(request), "SOAP-ENV:Envelope", newStr, 1)
 
-	log.Printf("%s", content)
+	content, err := common.Fedex{TestMode: testMode}.PostRequest(s, url)
+
 	if err != nil {
 		log.Printf("%s", err)
 	}
@@ -1009,6 +1013,6 @@ func (c RateXMLRequest) Rate(url string) {
 		log.Println("%s", err)
 	}
 
-	log.Printf("%s", _response.Body.Fault.Detail.Desc)
+	log.Printf("%s", _response.Body)
 
 }
