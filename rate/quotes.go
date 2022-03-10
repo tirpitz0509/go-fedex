@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 
+	conv "github.com/cstockton/go-conv"
 	"github.com/lostreturns/fedex/common"
 )
 
@@ -996,23 +997,32 @@ func (c RateRequest) Rate(token string, apiUrl string) (RateResponse, error) {
 	return _response, nil
 }
 
-func (c RateXMLRequest) Rate(url string, testMode bool) {
+func (c RateXMLRequest) Rate(url string, testMode bool) (RateXMLResponse, error) {
+	var _response RateXMLResponse
 	request, _ := xml.Marshal(c)
 	newStr := `SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://fedex.com/ws/rate/v28"`
 	s := strings.Replace(string(request), "SOAP-ENV:Envelope", newStr, 1)
 
-	content, err := common.Fedex{TestMode: testMode}.PostRequest(s, url)
+	content, err, statusCode := common.Fedex{TestMode: testMode}.PostRequest(s, url)
 
 	if err != nil {
 		log.Printf("%s", err)
+		return RateXMLResponse{}, err
 	}
 
-	var _response RateXMLResponse
+	if statusCode == 503 {
+		_statusCode, _ := conv.String(statusCode)
+		return RateXMLResponse{}, errors.New("Backend Error with code " + _statusCode)
+	}
+
+	log.Printf("%s", content)
+
 	err = xml.Unmarshal(content, &_response)
 	if err != nil {
 		log.Println("%s", err)
+		return RateXMLResponse{}, err
 	}
 
-	log.Printf("%s", _response.Body)
-
+	//log.Printf("%s", _response.Body)
+	return _response, nil
 }

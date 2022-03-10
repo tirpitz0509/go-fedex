@@ -2,6 +2,7 @@ package common
 
 import (
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -19,7 +20,7 @@ type Fedex struct {
 	TestMode bool //
 }
 
-func (c Fedex) PostRequest(xml string, path string) (content []byte, err error) {
+func (c Fedex) PostRequest(xml string, path string) (content []byte, err error, statuCode int) {
 	var url string
 	if c.TestMode {
 		url = FEDEX_API_TEST_URL + path
@@ -27,13 +28,17 @@ func (c Fedex) PostRequest(xml string, path string) (content []byte, err error) 
 		url = FEDEX_API_URL + path
 	}
 	xml = `<?xml version="1.0" encoding="UTF-8"?>` + xml
-	//log.Println(xml)
+
+	if c.TestMode {
+		log.Println(url)
+	}
+
 	resp, err := http.Post(url, "text/xml", strings.NewReader(xml))
 	if err != nil {
-		return content, err
+		return content, err, resp.StatusCode
 	}
 	defer resp.Body.Close()
 
-	//log.Println(resp.StatusCode)
-	return ioutil.ReadAll(resp.Body)
+	result, err := ioutil.ReadAll(resp.Body)
+	return result, err, resp.StatusCode
 }
