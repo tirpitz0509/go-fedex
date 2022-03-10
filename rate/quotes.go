@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	conv "github.com/cstockton/go-conv"
-	"github.com/lostreturns/fedex/common"
+	"github.com/tirpitz0509/go-fedex/common"
 )
 
 const (
