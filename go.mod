@@ -1,6 +1,6 @@
-module github.com/lostreturns/fedex
+module github.com/tirpitz0509/go-fedex
 
 go 1.16
 
 
-replace github.com/tirpitz0509/go-fedex => ./fedex
+
