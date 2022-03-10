@@ -1015,8 +1015,6 @@ func (c RateXMLRequest) Rate(url string, testMode bool) (RateXMLResponse, error)
 		return RateXMLResponse{}, errors.New("Backend Error with code " + _statusCode)
 	}
 
-	log.Printf("%s", content)
-
 	err = xml.Unmarshal(content, &_response)
 	if err != nil {
 		log.Println("%s", err)
